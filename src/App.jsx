@@ -17,7 +17,8 @@ const PROJECTS = [
     description: "An intelligent gallery app that categorizes images locally on-device without compromising privacy. Built with KMP for cross-platform efficiency.",
     color: COLORS.accentAndroid,
     icon: <Cpu className="w-6 h-6" />,
-    codeSnippet: `val model = OnnxInferenceModel.load(context)\nval predictions = model.predict(imageBitmap)\nval tags = predictions.filter { it.score > 0.8 }`
+    codeSnippet: `val model = OnnxInferenceModel.load(context)\nval predictions = model.predict(imageBitmap)\nval tags = predictions.filter { it.score > 0.8 }`,
+    link: "https://github.com/dontknow492/Next"
   },
   {
     title: "Ollama-gui",
@@ -26,7 +27,8 @@ const PROJECTS = [
     description: "A seamless graphical interface for interacting with local LLMs via Ollama. Ensures your data never leaves your machine.",
     color: COLORS.accentPython,
     icon: <Terminal className="w-6 h-6" />,
-    codeSnippet: `ViewModel {\n  val response = repository.generate(prompt)\n  _uiState.update { it.copy(text = response) }\n}`
+    codeSnippet: `ViewModel {\n  val response = repository.generate(prompt)\n  _uiState.update { it.copy(text = response) }\n}`,
+    link: "https://github.com/dontknow492/Ollama-gui"
   },
   {
     title: "ExpenseTracker",
@@ -35,7 +37,8 @@ const PROJECTS = [
     description: "Modern personal finance management. Features interactive charts, offline-first Room database architecture, and deep UX polish.",
     color: '#10B981', // Emerald
     icon: <Database className="w-6 h-6" />,
-    codeSnippet: `@Dao\ninterface TransactionDao {\n  @Query("SELECT * FROM tx")\n  fun getAll(): Flow<List<Tx>>\n}`
+    codeSnippet: `@Dao\ninterface TransactionDao {\n  @Query("SELECT * FROM tx")\n  fun getAll(): Flow<List<Tx>>\n}`,
+    link: "https://github.com/dontknow492/ExpenseTracker"
   },
   {
     title: "Musify",
@@ -44,7 +47,8 @@ const PROJECTS = [
     description: "A beautiful, performant local music player. Implements advanced Media3 APIs and dynamic color theming based on album art.",
     color: '#F43F5E', // Rose
     icon: <Layers className="w-6 h-6" />,
-    codeSnippet: `exoPlayer.setMediaItem(mediaItem)\nexoPlayer.prepare()\nexoPlayer.play()`
+    codeSnippet: `exoPlayer.setMediaItem(mediaItem)\nexoPlayer.prepare()\nexoPlayer.play()`,
+    link: "https://github.com/dontknow492/Musify"
   }
 ];
 
@@ -84,7 +88,8 @@ const CustomCursor = () => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-50 mix-blend-screen"
+      // FIXED: Added "hidden md:block" so custom cursor doesn't hijack touch interactions on mobile
+      className="hidden md:block fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-50 mix-blend-screen"
       animate={{
         x: mousePosition.x - 16,
         y: mousePosition.y - 16,
@@ -102,6 +107,9 @@ const MagneticButton = ({ children, onClick, className = "" }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const handleMouse = (e) => {
+    // Basic protection against touch events triggering mouse moves wildly
+    if (window.innerWidth < 768) return; 
+    
     const { clientX, clientY } = e;
     const { height, width, left, top } = ref.current.getBoundingClientRect();
     const middleX = clientX - (left + width / 2);
@@ -195,7 +203,6 @@ const AIAgent = () => {
 
     let responseText = "Sorry, I'm having trouble connecting to the network right now. Please try again later.";
 
-    // Exponential backoff retry logic (up to 5 retries: 1s, 2s, 4s, 8s, 16s)
     for (let i = 0; i < 5; i++) {
       try {
         const res = await fetch(url, {
@@ -208,7 +215,7 @@ const AIAgent = () => {
         
         const data = await res.json();
         responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I don't have an answer for that right now.";
-        break; // Success, exit retry loop
+        break; 
       } catch (err) {
         if (i < 4) {
           const delay = Math.pow(2, i) * 1000;
@@ -223,10 +230,8 @@ const AIAgent = () => {
 
   return (
     <div className="bg-white/[0.02] border border-white/[0.05] rounded-3xl overflow-hidden flex flex-col h-[500px] relative">
-      {/* Decorative Gradient */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#38BDF8] to-[#818CF8]" />
       
-      {/* Header */}
       <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-white/[0.01]">
         <div className="p-3 bg-[#38BDF8]/10 rounded-2xl border border-[#38BDF8]/20">
           <Bot className="w-6 h-6 text-[#38BDF8]" />
@@ -239,7 +244,6 @@ const AIAgent = () => {
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((msg, idx) => (
           <motion.div 
@@ -267,19 +271,19 @@ const AIAgent = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-4 border-t border-white/[0.05] bg-black/20">
         <form 
           onSubmit={(e) => { e.preventDefault(); handleSend(); }}
           className="relative flex items-center"
         >
+          {/* FIXED: Changed text-sm to text-base md:text-sm to prevent auto-zoom on mobile keyboards */}
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="E.g. What is Manish's experience with Compose?"
             disabled={isLoading}
-            className="w-full bg-white/5 border border-white/10 rounded-full py-4 pl-6 pr-14 text-sm focus:outline-none focus:border-[#38BDF8]/50 focus:bg-white/10 transition-all text-white placeholder-gray-500 disabled:opacity-50"
+            className="w-full bg-white/5 border border-white/10 rounded-full py-4 pl-6 pr-14 text-base md:text-sm focus:outline-none focus:border-[#38BDF8]/50 focus:bg-white/10 transition-all text-white placeholder-gray-500 disabled:opacity-50"
           />
           <button 
             type="submit"
@@ -302,17 +306,15 @@ export default function Portfolio() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#38BDF8]/30 selection:text-white overflow-hidden">
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#38BDF8]/30 selection:text-white overflow-hidden" style={{ colorScheme: 'dark' }}>
       <CustomCursor />
       
-      {/* Dynamic Background Noise & Gradients */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-20" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
       <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#38BDF8] rounded-full blur-[150px] opacity-10 pointer-events-none z-0"></div>
       <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#818CF8] rounded-full blur-[150px] opacity-10 pointer-events-none z-0"></div>
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 py-12 md:py-24 space-y-32">
         
-        {/* HERO SECTION */}
         <section className="relative min-h-[80vh] flex flex-col justify-center items-start pt-20">
           <motion.div style={{ y: heroY, opacity: heroOpacity }} className="w-full">
             <FadeIn delay={0.1}>
@@ -331,7 +333,6 @@ export default function Portfolio() {
               </MagneticButton>
             </FadeIn>
 
-            {/* Abstract 3D Hero Visual Element */}
             <motion.div 
               className="absolute top-1/2 right-10 transform -translate-y-1/2 hidden lg:flex items-center justify-center w-80 h-80"
               animate={{ rotateY: 360, rotateX: 360 }}
@@ -348,7 +349,6 @@ export default function Portfolio() {
           </motion.div>
         </section>
 
-        {/* ABOUT NARRATIVE (Bento Grid) */}
         <section id="about" className="space-y-8">
           <FadeIn>
              <h3 className="text-sm font-bold tracking-widest text-gray-500 uppercase">01. The Narrative</h3>
@@ -384,7 +384,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* PROJECTS (The Big 4) */}
         <section id="projects" className="space-y-12">
            <FadeIn>
              <div className="flex justify-between items-end">
@@ -396,11 +395,11 @@ export default function Portfolio() {
             {PROJECTS.map((project, index) => (
               <FadeIn key={index} delay={index * 0.1}>
                 <motion.div 
-                  className="interactive-card group relative h-[450px] bg-white/[0.02] border border-white/[0.05] rounded-3xl overflow-hidden cursor-none"
+                  // FIXED: Changed cursor-none to md:cursor-none so normal tapping works on mobile
+                  className="interactive-card group relative h-[450px] bg-white/[0.02] border border-white/[0.05] rounded-3xl overflow-hidden md:cursor-none"
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  {/* Dynamic Glow Background on Hover */}
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
                     style={{ background: `radial-gradient(circle at center, ${project.color} 0%, transparent 70%)` }}
@@ -411,12 +410,13 @@ export default function Portfolio() {
                       <div className="p-3 bg-white/5 rounded-2xl border border-white/10 text-white backdrop-blur-md">
                         {project.icon}
                       </div>
-                      <a href="#" className="p-3 bg-white/5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white/20">
+                      
+                      {/* FIXED: Changed opacity so the button is always visible on mobile, fades in on desktop */}
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-3 bg-white/5 rounded-full border border-white/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 hover:bg-white/20">
                          <ExternalLink className="w-4 h-4" />
                       </a>
                     </div>
 
-                    {/* Faux Code Snippet Background Element */}
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 font-mono text-sm whitespace-pre pointer-events-none">
                       {project.codeSnippet.repeat(5)}
                     </div>
@@ -440,7 +440,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* TECHNICAL SKILLS */}
         <section className="space-y-8">
            <FadeIn>
              <h3 className="text-sm font-bold tracking-widest text-gray-500 uppercase">03. Technical Arsenal</h3>
@@ -467,7 +466,6 @@ export default function Portfolio() {
           </div>
         </section>
 
-        {/* AI ASSISTANT SECTION */}
         <section className="space-y-8 pt-12">
            <FadeIn>
              <div className="flex items-center gap-3">
@@ -492,11 +490,11 @@ export default function Portfolio() {
           
           <FadeIn delay={0.2} className="flex gap-6">
             {[
-              { icon: <Github className="w-5 h-5" />, label: "GitHub" },
-              { icon: <Linkedin className="w-5 h-5" />, label: "LinkedIn" },
-              { icon: <Mail className="w-5 h-5" />, label: "Email" }
+              { icon: <Github className="w-5 h-5" />, label: "GitHub", url: "https://github.com/dontknow492" },
+              { icon: <Linkedin className="w-5 h-5" />, label: "LinkedIn", url: "https://linkedin.com/in/YOUR_USERNAME" }, 
+              { icon: <Mail className="w-5 h-5" />, label: "Email", url: "mailto:YOUR_EMAIL@example.com" } 
             ].map((social, i) => (
-              <a key={i} href="#" className="p-4 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-300 text-gray-400 hover:text-white">
+              <a key={i} href={social.url} target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-300 text-gray-400 hover:text-white">
                 {social.icon}
               </a>
             ))}
